@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const user = require('../models/User')
+const User = require('../models/User')
 
 // sign up route handler
 exports.signup = async (req,res) => {
@@ -10,23 +10,25 @@ exports.signup = async (req,res) => {
         const existingUser = await user.findOne({email});
         if(existingUser){
             return res.status(400).json({
+                success : false,
                 message: 'User already exist',
-                success : false
             });
 
             //secure password 
+            console.log("First try")
             let hashedpassword;
             try{
-                hashedpassword = await bcrypt.hash(password,10); 
-            }catch(error){
+                console.log("second try")
+                hashedpassword = await bcrypt.hash(password, 10);
+            }catch(err){
                 return res.status(500).json({
                     success:false,
                     message:'Error in hashing Password'
-                })
+                });
             }
         }
         // create entry  for new user
-        const user = await user.create({
+        const user = await User.create({
             name,email,password:hashpassword,role                 
         })
 
@@ -36,7 +38,7 @@ exports.signup = async (req,res) => {
         })
     }
     catch(error){
-        console.error(first)
+        console.error(error)
         res.status(500).json({
             success : false,
             message: 'Error in Hashing', 
@@ -44,3 +46,44 @@ exports.signup = async (req,res) => {
     }
 }
 
+//login
+
+exports.login = async (req,res) => {
+    try{
+        //data fetch
+        const {email,password} = req.body;
+        //validation on email and password
+        if(!email || !password){
+            return res.status(400).json({
+                success : false,
+                message:'please fill all the details carefully',
+            })
+        }
+
+        //check for registered user
+        const user = await user.findOne({email})
+        // if not a register user
+        if(!user){
+            return res.status(401).json({
+                success:false,
+                message:'user id not register',
+            })
+        }
+
+        //verify password & generate JWT Token
+        if(await bcrypt.compare(password,user.password)){
+            //password match
+            
+        }
+        else{
+            //password do not match
+            return res.status(403).json({
+                success:false,
+                message:'password do not match',
+            })
+        }
+    }
+    catch(err){
+        //end{code}
+    }
+}

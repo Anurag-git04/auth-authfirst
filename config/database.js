@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 exports.connect = ()=>{
-    mongoose.connect('mongodb://localhost:27017/mydatabase',{
+    mongoose.connect('mongodb://localhost:27017/authdb',{
         useNewUrlParser:true,
         useUnifiedTopology:true
     }).then(() => {
