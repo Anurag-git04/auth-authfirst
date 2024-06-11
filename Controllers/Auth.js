@@ -1,5 +1,8 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User')
+const jwt = require("jsonwebtoken");
+const { options } = require('../routes/user');
+require("dotenv").config();
 
 // sign up route handler
 exports.signup = async (req,res) => {
@@ -70,10 +73,31 @@ exports.login = async (req,res) => {
             })
         }
 
+        const payload = {
+            email:user.email,
+            id:user._id,
+            role:user.role
+        }
         //verify password & generate JWT Token
         if(await bcrypt.compare(password,user.password)){
             //password match
-            
+            let token = jwt.sign(payload, process.env.JWT_SECRET,
+                {
+                    expiresIn:"2h",
+                })
+            user.token = token;
+            user.password = undefined;
+            const option ={
+                expires: new Date( Date.now() + 3* 24*60*60*1000),
+                httpOnly:true
+            }
+
+            res.cookie("token", token, options).status(200).json({
+                success : true,
+                token,
+                user,
+                message:"user logged in succesfully"
+            })
         }
         else{
             //password do not match
@@ -84,6 +108,10 @@ exports.login = async (req,res) => {
         }
     }
     catch(err){
-        //end{code}
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:'login failure',
+        })
     }
 }
