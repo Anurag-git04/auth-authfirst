@@ -10,6 +10,7 @@ exports.auth = (req,res, next)=>{
         //extract jwt token
         // pending other way to fetch token
         const token = req.body.token ;
+        // || req.body.token || token.header("Authorization").replace("Bearer","")
 
         if(!token){
             return res.status(401).json({
