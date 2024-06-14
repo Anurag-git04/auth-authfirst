@@ -9,8 +9,12 @@ exports.auth = (req,res, next)=>{
     try{
         //extract jwt token
         // pending other way to fetch token
+
+        console.log("cookies",req.cookies.token);
+        console.log("body",req.body.token)
+
         const token = req.body.token ;
-        // || req.body.token || token.header("Authorization").replace("Bearer","")
+        // || req.cookie.token || token.header("Authorization").replace("Bearer",""){safest}
 
         if(!token){
             return res.status(401).json({
